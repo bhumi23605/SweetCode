@@ -229,10 +229,28 @@ function updateTimeAllowed(difficulty) {
 
 
 // Listen for time deduction messages
+//chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+//  if (message.type === 'deductTime') {
+//    timeAllowed = Math.max(-5, timeAllowed - message.cost * 60);
+//    chrome.storage.local.set({ timeAllowed });
+//  }
+//});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'deductTime') {
-    timeAllowed = Math.max(-5, timeAllowed - message.cost * 60);
-    chrome.storage.local.set({ timeAllowed });
+  switch (message.type) {
+    case 'deductTime':
+      timeAllowed = Math.max(-5, timeAllowed - message.cost * 60);
+      chrome.storage.local.set({ timeAllowed });
+      break;
+
+    case 'updateResetPeriod':
+      const newPeriod = Math.max(1, parseInt(message.period, 10));
+      if (!isNaN(newPeriod)) {
+        resetPeriodDays = newPeriod;
+        chrome.storage.local.set({ resetPeriodDays: newPeriod });
+        console.log(`✅ Reset period updated to ${newPeriod} days`);
+      }
+      break;
   }
 });
 
@@ -355,16 +373,16 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 });
 
 // Listen for messages to update the reset period
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'updateResetPeriod') {
-    const newPeriod = Math.max(1, parseInt(message.period, 10));
-    if (!isNaN(newPeriod)) {
-      resetPeriodDays = newPeriod;
-      chrome.storage.local.set({ resetPeriodDays: newPeriod });
-      console.log(`✅ Reset period updated to ${newPeriod} days`);
-    }
-  }
-});
+//chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+//  if (message.type === 'updateResetPeriod') {
+//    const newPeriod = Math.max(1, parseInt(message.period, 10));
+//    if (!isNaN(newPeriod)) {
+//      resetPeriodDays = newPeriod;
+//      chrome.storage.local.set({ resetPeriodDays: newPeriod });
+//      console.log(` Reset period updated to ${newPeriod} days`);
+//    }
+//  }
+//});
 
 // Handle tab switching
 chrome.tabs.onActivated.addListener(function(activeInfo) {
